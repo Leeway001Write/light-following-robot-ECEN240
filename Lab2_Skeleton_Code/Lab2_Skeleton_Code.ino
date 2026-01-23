@@ -170,7 +170,7 @@ void loop() {
   // This DebugStateOutput flag can be used to easily turn on the
   // serial debugging to know what the robot is perceiving and what
   // actions the robot wants to take.
-  int DebugStateOutput = true; // Change false to true to debug
+  int DebugStateOutput = false; // Change false to true to debug
   
   RobotPerception(); // PERCEPTION
   if (DebugStateOutput) {
@@ -194,8 +194,6 @@ void loop() {
     Serial.print("\t");
   }
   RobotAction(); // ACTION
-  Serial.print("Voltage:");
-  Serial.print(analogRead(BUTTON_3));
   Serial.print("\n");
 }
 
