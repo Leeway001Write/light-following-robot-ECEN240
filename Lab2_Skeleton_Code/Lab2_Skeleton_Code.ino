@@ -234,7 +234,7 @@ void RobotPerception() {
    /*Add code in lab 4*/
 
    // Collision Sensor
-   if (isCollision()) {   // Add code in isCollision() function for lab 2 milestone 1
+   if (isCollision()) {
     SensedCollision = DETECTION_YES;
    } else {
     SensedCollision = DETECTION_NO;
