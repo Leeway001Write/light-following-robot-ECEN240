@@ -222,7 +222,16 @@ void RobotPerception() {
 
       
   /* Add code to detect if light is up or down. Lab 2 milestone 3*/
-
+  if (isButtonPushed(BUTTON_1)) {
+    SensedLightUp = DETECTION_YES;
+  } else {
+    SensedLightUp = DETECTION_NO;
+  }
+  if (isButtonPushed(BUTTON_5)) {
+    SensedLightDown = DETECTION_YES;
+  } else {
+    SensedLightDown = DETECTION_NO;
+  }
   
 
    // Capacitive Sensor
@@ -416,13 +425,44 @@ void fsmMoveServoUpAndDown() {
   static int moveServoState = 0;
   //Serial.print(moveServoState); Serial.print("\t"); //uncomment for debugging
   
-  // Milestone 3
   //Create a state machine modeled after the ones in milestones 1 and 2
   // to plan the servo action based off of the perception of the robot
   //Remember no light or light in front = servo doesn't move
   //Light above = servo moves up
   //Light below = servo moves down
-  
+  switch (moveServoState) {
+    case 0: // No light / light is in center
+        // Don't move
+        ActionServoMove = SERVO_MOVE_STOP;
+
+        // Check light sensors
+        if (SensedLightUp && !SensedLightDown) {
+            moveServoState = 1;
+        } else if (SensedLightDown && !SensedLightUp) {
+            moveServoState = 2;
+        }
+        break;
+
+    case 1: // Light sensed up
+        // UP
+        ActionServoMove = SERVO_MOVE_UP;
+
+        // Check light sensors
+        if (!(SensedLightUp ^ SensedLightDown)) {
+            moveServoState = 0;
+        }
+        break;
+
+    case 2: // Light sensed down
+        // DOWN
+        ActionServoMove = SERVO_MOVE_DOWN;
+        
+        // Check light sensors
+        if (!(SensedLightUp ^ SensedLightDown)) {
+            moveServoState = 0;
+        }
+        break;
+  }  
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -492,13 +532,16 @@ void MoveServo() {
   /* Add CurrentServoAngle in lab 6 */
   switch(ActionServoMove) {
     case SERVO_MOVE_STOP:
-      /* Add code in milestone 3 */
-      break;
+        doTurnLedOff(LED_1);
+        doTurnLedOff(LED_5);
+    break;
     case SERVO_MOVE_UP:
-      /* Add code in milestone 3 */
+        doTurnLedOn(LED_1);
+        doTurnLedOff(LED_5);
       break;
     case SERVO_MOVE_DOWN:
-      /* Add code in milestone 3 */
+      doTurnLedOn(LED_5);
+      doTurnLedOff(LED_1);
       break;
   }
 }
