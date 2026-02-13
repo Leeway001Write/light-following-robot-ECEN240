@@ -47,7 +47,8 @@ your sensors and servos. */
 
 
 // Motor enable pins - Lab 3
-// These will replace LEDs 2 and 4
+#define H_BRIDGE_ENA 5
+#define H_BRIDGE_ENB 3
 
 // Photodiode pins - Lab 5
 // These will replace buttons 1, 2, 4, 5
@@ -146,9 +147,9 @@ void setup() {
   
   //Set up output pins
   pinMode(LED_1, OUTPUT);
-  pinMode(LED_2, OUTPUT);
+  pinMode(H_BRIDGE_ENA, OUTPUT);
   pinMode(LED_3, OUTPUT);
-  pinMode(LED_4, OUTPUT);
+  pinMode(H_BRIDGE_ENB, OUTPUT);
   pinMode(LED_5, OUTPUT);
   
   //Set up input pins
@@ -501,20 +502,20 @@ void RobotAction() {
   // This drives the main motors on the robot
   switch(ActionRobotDrive) {
     case DRIVE_STOP:
-      doTurnLedOff(LED_2);
-      doTurnLedOff(LED_4);
+      doTurnLedOff(H_BRIDGE_ENA);
+      doTurnLedOff(H_BRIDGE_ENB);
       break;
     case DRIVE_LEFT:
-      doTurnLedOn(LED_2);
-      doTurnLedOff(LED_4);
+      doTurnLedOn(H_BRIDGE_ENA);
+      doTurnLedOff(H_BRIDGE_ENB);
       break;
     case DRIVE_RIGHT:
-      doTurnLedOff(LED_2);
-      doTurnLedOn(LED_4);
+      doTurnLedOff(H_BRIDGE_ENA);
+      doTurnLedOn(H_BRIDGE_ENB);
       break;
     case DRIVE_STRAIGHT:
-      doTurnLedOn(LED_2);
-      doTurnLedOn(LED_4);
+      doTurnLedOn(H_BRIDGE_ENA);
+      doTurnLedOn(H_BRIDGE_ENB);
       break;
   }
   
