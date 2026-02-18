@@ -1,7 +1,7 @@
 #include "Arduino.h"
 
 // Pin definitions
-#define BATTERY_PIN 1
+#define BATTERY_PIN A1
 #define LED_1 12
 #define LED_2 11
 #define LED_3 10
@@ -18,9 +18,10 @@
 float V;
 
 void setup() {
-    pinMode(LED_1, WRITE);
-    pinMode(LED_2, WRITE);
-    pinMode(LED_3, WRITE);
+    pinMode(BATTERY_PIN, INPUT);
+    pinMode(LED_1, OUTPUT);
+    pinMode(LED_2, OUTPUT);
+    pinMode(LED_3, OUTPUT);
 }
 
 void loop() {
