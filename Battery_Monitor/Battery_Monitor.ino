@@ -34,7 +34,7 @@ void loop() {
     fsmUpdateBatteryMonitor();
 }
 
-fsmUpdateBatteryMonitor() {
+void fsmUpdateBatteryMonitor() {
     static int batteryState = 0;
 
     switch (batteryState) {
@@ -96,7 +96,7 @@ fsmUpdateBatteryMonitor() {
     }
 }
 
-readBatteryVoltage() {
+float getBatteryVoltage() {
     return getPinVoltage(BATTERY_PIN);
 }
 
