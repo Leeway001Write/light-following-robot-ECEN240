@@ -1,12 +1,13 @@
 #include "Arduino.h"
 
 // Pin definitions
-#define BATTERY_PIN A1
+#define BATTERY_PIN A7
 #define LED_1 12
 #define LED_2 11
 #define LED_3 10
 
 #define FULL 5.0 // Max battery voltage (V)
+#define V_IN 5.0 // True voltage into 5V pin
 
 // Battery State definitions
 #define BATTERY_FULL 0
@@ -22,11 +23,15 @@ void setup() {
     pinMode(LED_1, OUTPUT);
     pinMode(LED_2, OUTPUT);
     pinMode(LED_3, OUTPUT);
+
+    Serial.begin(9600);
 }
 
 void loop() {
     // PERCEPTION
     V = getBatteryVoltage();
+    Serial.print("Battery_Voltage:");
+    Serial.println(V);
 
     // PLANNING
 
@@ -108,5 +113,5 @@ void offLED(int pin) {
 }
 
 float getPinVoltage(int pin) {
-  return 5 * (float)analogRead(pin) / 1024;
+  return V_IN * (float)analogRead(pin) / 1024;
 }
