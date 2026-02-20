@@ -50,7 +50,7 @@ your sensors and servos. */
 #define H_BRIDGE_ENB 3
 
 // Battery Monitor
-  int EnableBatteryMonitor = true;
+  int EnableBatteryMonitor = false;
   
   // Pin definitions
   #define BATTERY_PIN A7
@@ -335,7 +335,9 @@ void RobotPlanning(void) {
   fsmCollisionDetection(); // Milestone 1
   fsmMoveServoUpAndDown(); // Milestone 3
 
-  fsmUpdateBatteryMonitor(); // Lab 3
+  if (EnableBatteryMonitor) {
+    fsmUpdateBatteryMonitor(); // Lab 3
+  }
   // Add Speed Control State Machine in lab 4
 }
 
