@@ -45,10 +45,30 @@ your sensors and servos. */
 #define LED_4   3       // Right Middle LED - Right Motor
 #define LED_5   2       // Far Right LED - Servo Down
 
-
 // Motor enable pins - Lab 3
 #define H_BRIDGE_ENA 5
 #define H_BRIDGE_ENB 3
+
+// Battery Monitor
+  int EnableBatteryMonitor = true;
+  
+  // Pin definitions
+  #define BATTERY_PIN A7
+  #define BATTERY_LED_1 12
+  #define BATTERY_LED_2 11
+  #define BATTERY_LED_3 10
+  
+  #define MAX_BATTERY_V 5.0 // Max battery voltage (V)
+  #define V_IN 5.0 // True voltage into 5V pin
+  
+  // Battery State definitions
+  #define BATTERY_FULL 0
+  #define BATTERY_MEDIUM 1
+  #define BATTERY_LOW 2
+  #define BATTERY_REPLACE 3
+  
+  // Global Battery Voltage
+  float BatteryVoltage = 0;
 
 // Photodiode pins - Lab 5
 // These will replace buttons 1, 2, 4, 5
@@ -244,6 +264,11 @@ void RobotPerception() {
    } else {
     SensedCollision = DETECTION_NO;
    }
+
+   // Battery Monitor
+   if (EnableBatteryMonitor) {
+    BatteryVoltage = getPinVoltage(BATTERY_PIN);
+   }
 }
 
 
@@ -309,6 +334,8 @@ void RobotPlanning(void) {
   // based on the sensing from the Perception stage.
   fsmCollisionDetection(); // Milestone 1
   fsmMoveServoUpAndDown(); // Milestone 3
+
+  fsmUpdateBatteryMonitor(); // Lab 3
   // Add Speed Control State Machine in lab 4
 }
 
@@ -479,6 +506,76 @@ void fsmCapacitiveSensorSpeedControl() {
 ////////////////////////////////////////////////////////////////////
 void fsmChangeSpeed() {
   /*Implement in lab 4*/
+}
+
+////////////////////////////////////////////////////////////////////
+// State machine for indicating battery charge.
+////////////////////////////////////////////////////////////////////
+void fsmUpdateBatteryMonitor() {
+    static int batteryState = 0;
+    Serial.print("B_V: ");
+    Serial.println(BatteryVoltage);
+
+    Serial.print("B_STATE: ");
+    Serial.println(batteryState);
+
+    switch (batteryState) {
+        case BATTERY_FULL:
+            // Turn 3 LEDS on
+            doTurnLedOn(BATTERY_LED_1);
+            doTurnLedOn(BATTERY_LED_2);
+            doTurnLedOn(BATTERY_LED_3);
+
+            // Transition to MEDIUM if charge is below 90%
+            if (BatteryVoltage < (0.9 * MAX_BATTERY_V)) {
+                batteryState = BATTERY_MEDIUM;
+            }
+        break;
+        
+        case BATTERY_MEDIUM:
+            // Turn 2 LEDS on
+            doTurnLedOn(BATTERY_LED_1);
+            doTurnLedOn(BATTERY_LED_2);
+            doTurnLedOff(BATTERY_LED_3);
+
+            // Transition to MAX_BATTERY_V if charge is at least 90%
+            if (BatteryVoltage >= (0.9 * MAX_BATTERY_V)) {
+                batteryState = BATTERY_FULL;
+            }
+            // Transition to LOW  if charge is below    80%
+            if (BatteryVoltage < (0.8 * MAX_BATTERY_V)) {
+                batteryState = BATTERY_LOW;
+            }
+        break;
+
+        case BATTERY_LOW:
+            // Turn 1 LED on
+            doTurnLedOn(BATTERY_LED_1);
+            doTurnLedOff(BATTERY_LED_2);
+            doTurnLedOff(BATTERY_LED_3);
+
+            // Transition to MEDIUM  if charge is at least 80%
+            if (BatteryVoltage >= (0.8 * MAX_BATTERY_V)) {
+                batteryState = BATTERY_MEDIUM;
+            }
+            // Transition to REPLACE if charge is below    70%
+            if (BatteryVoltage < (0.7 * MAX_BATTERY_V)) {
+                batteryState = BATTERY_REPLACE;
+            }
+        break;
+
+        case BATTERY_REPLACE:
+            // Turn 0 LEDS on
+            doTurnLedOff(BATTERY_LED_1);
+            doTurnLedOff(BATTERY_LED_2);
+            doTurnLedOff(BATTERY_LED_3);
+            
+            // Transition to LOW if charge is at least 0.7
+            if (BatteryVoltage >= (0.7 * MAX_BATTERY_V)) {
+                batteryState = BATTERY_LOW;
+            }
+        break;
+    }
 }
 
 
