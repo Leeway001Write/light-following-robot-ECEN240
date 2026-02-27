@@ -354,12 +354,12 @@ void RobotPlanning(void) {
   // based on the sensing from the Perception stage.
   fsmCollisionDetection(); // Milestone 1
   fsmMoveServoUpAndDown(); // Milestone 3
+  
+  fsmCapacitiveSensorSpeedControl();
 
   if (EnableBatteryMonitor) {
     fsmUpdateBatteryMonitor(); // Lab 3
   }
-  
-  fsmCapacitiveSensorSpeedControl();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -533,12 +533,13 @@ void fsmCapacitiveSensorSpeedControl() {
     case 1: // Pressed
 
       if (SensedCapacitiveTouch == DETECTION_NO) {
-        sensorState = 0;
+        sensorState = 2;
       }
       break;
     case 2: // Released
       fsmChangeSpeed();  
 
+      sensorState = 0;
       break;
   }
 }
@@ -548,20 +549,27 @@ void fsmCapacitiveSensorSpeedControl() {
 ////////////////////////////////////////////////////////////////////
 void fsmChangeSpeed() {
   static int speedState = 0;
-  speedState++;
 
   switch (speedState) {
     case 0: // STOP
       ActionRobotSpeed = SPEED_STOP;
+
+      speedState = 1;
       break;
     case 1: // LOW
       ActionRobotSpeed = SPEED_LOW;
+
+      speedState = 2;
       break;
     case 2: // MED
       ActionRobotSpeed = SPEED_MED;
+
+      speedState = 3;
       break;
     case 3: // HIGH
       ActionRobotSpeed = SPEED_HIGH;
+
+      speedState = 0;
       break;
   }
 }
@@ -646,8 +654,7 @@ void RobotAction() {
   // This turns the collision LED on and off
   switch(ActionCollision) {
     case COLLISION_OFF:
-      doTurnLedOff(LED_3); //Collision LED off - DON'T FORGET TO ADD CODE TO doTurnLedOff() 
-                           // AND doTurnLedOn() OR ELSE YOUR LEDS WON'T WORK!!!
+      doTurnLedOff(LED_3); //Collision LED off
       break;
     case COLLISION_ON:
       doTurnLedOn(LED_3);
