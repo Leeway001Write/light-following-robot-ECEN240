@@ -7,6 +7,7 @@
 #define PHOTODIODE_LIGHT_THRESHOLD 3
 
 void setup() {
+  Serial.begin(9600);
     pinMode(PD_IN_PIN, INPUT);
     pinMode(LED_PIN, OUTPUT);
 }
@@ -27,5 +28,5 @@ bool isLight(int pin) {
 }
 
 float getPinVoltage(int pin) {
-    return 5 * (float) analogRead(pin) / 1024;
+    return 5 * (float)analogRead(pin) / 1024;
 }
