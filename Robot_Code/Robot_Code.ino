@@ -32,13 +32,6 @@ your sensors and servos. */
 // Hardware pin definitions
 // Replace the pin numbers with those you connect to your robot
 
-// Button pins. These will be replaced with the photodiode variables in lab 5
-#define BUTTON_1  A2     // Far left Button - Servo Up
-#define BUTTON_2  A3     // Left middle button - Left Motor
-#define BUTTON_3  A4     // Middle Button - Collision
-#define BUTTON_4  A5     // Right middle button - Right Motor
-#define BUTTON_5  A6     // Far right button - Servo Down
-
 // LED pins (note that digital pins do not need "D" in front of them)
 #define LED_1   6       // Far Left LED - Servo Up
 #define LED_2   5       // Left Middle LED  - Left Motor
@@ -72,7 +65,11 @@ your sensors and servos. */
   float BatteryVoltage = 0;
 
 // Photodiode pins - Lab 5
-// These will replace buttons 1, 2, 4, 5
+#define PHOTODIODE_PIN_UP     A2     // Photodiode - Servo Up
+#define PHOTODIODE_PIN_LEFT   A3     // Photodiode - Left Motor
+#define BUTTON_3         A4     // Sensor     - Collision
+#define PHOTODIODE_PIN_RIGHT  A5     // Photodiode - Right Motor
+#define PHOTODIODE_PIN_DOWN   A6     // Photodiode - Servo Down
 
 // Capacitive sensor pins - Lab 4
   #define CAP_SENSOR_SEND_PIN 11
@@ -92,7 +89,7 @@ your sensors and servos. */
 #define BUTTON_THRESHOLD 2.5
 
 // Voltage at which a photodiode voltage is considered to be present - Lab 5
-
+#define PHOTODIODE_LIGHT_THRESHOLD 3 // Sensor is ON if light is greater than this many volts
 
 // Number of samples that the capacitor sensor will use in a measurement - Lab 4
 #define CAP_SENSOR_SAMPLES 40
@@ -186,11 +183,11 @@ void setup() {
   pinMode(CAP_SENSOR_SEND_PIN, OUTPUT);
   
   //Set up input pins
-  pinMode(BUTTON_1, INPUT);
-  pinMode(BUTTON_2, INPUT);
+  pinMode(PHOTODIODE_PIN_UP, INPUT);
+  pinMode(PHOTODIODE_PIN_LEFT, INPUT);
   pinMode(BUTTON_3, INPUT);
-  pinMode(BUTTON_4, INPUT);
-  pinMode(BUTTON_5, INPUT);
+  pinMode(PHOTODIODE_PIN_RIGHT, INPUT);
+  pinMode(PHOTODIODE_PIN_DOWN, INPUT);
 
   pinMode(CAP_SENSOR_RECEIVE_PIN, INPUT);
 
@@ -245,12 +242,12 @@ void RobotPerception() {
   // Photodiode Sensing
   //Serial.print(getPinVoltage(BUTTON_2)); Serial.print("\t"); //uncomment for debugging
   
-  if (isButtonPushed(BUTTON_2)){
+  if (isLight(PHOTODIODE_PIN_LEFT)){
     SensedLightLeft = DETECTION_YES;
   } else {
     SensedLightLeft = DETECTION_NO;
   }
-  if (isButtonPushed(BUTTON_4)) { 
+  if (isLight(PHOTODIODE_PIN_RIGHT)) { 
     SensedLightRight = DETECTION_YES;
   } else {
     SensedLightRight = DETECTION_NO;
@@ -258,12 +255,12 @@ void RobotPerception() {
 
       
   /* Add code to detect if light is up or down. Lab 2 milestone 3*/
-  if (isButtonPushed(BUTTON_1)) {
+  if (isLight(PHOTODIODE_PIN_UP)) {
     SensedLightUp = DETECTION_YES;
   } else {
     SensedLightUp = DETECTION_NO;
   }
-  if (isButtonPushed(BUTTON_5)) {
+  if (isLight(PHOTODIODE_PIN_DOWN)) {
     SensedLightDown = DETECTION_YES;
   } else {
     SensedLightDown = DETECTION_NO;
@@ -343,6 +340,15 @@ bool isCapacitiveSensorTouched() {
   long tau = touchSensor.capacitiveSensor(CAP_SENSOR_SAMPLES); 
   
   return tau >= CAP_SENSOR_TAU_THRESHOLD;
+}
+
+////////////////////////////////////////////////////////////////////
+// Function that detects if light is present
+////////////////////////////////////////////////////////////////////
+bool isLight(int pin) {
+  float light = getPinVoltage(pin);
+  // Serial.println(light); // Use this line to test
+  return (light > PHOTODIODE_LIGHT_THRESHOLD);
 }
 
 
