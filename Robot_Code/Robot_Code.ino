@@ -65,11 +65,11 @@ your sensors and servos. */
   float BatteryVoltage = 0;
 
 // Photodiode pins - Lab 5
-#define PHOTODIODE_PIN_UP     A2     // Photodiode - Servo Up
-#define PHOTODIODE_PIN_LEFT   A3     // Photodiode - Left Motor
-#define BUTTON_3         A4     // Sensor     - Collision
-#define PHOTODIODE_PIN_RIGHT  A5     // Photodiode - Right Motor
-#define PHOTODIODE_PIN_DOWN   A6     // Photodiode - Servo Down
+#define PHOTODIODE_PIN_UP     A2     // Photodiode - Servo Up     ORANGE
+#define PHOTODIODE_PIN_LEFT   A3     // Photodiode - Left Motor   PURPLE
+#define BUTTON_3         A4     // Sensor     - Collision       RED
+#define PHOTODIODE_PIN_RIGHT  A5     // Photodiode - Right Motor  YELLOW
+#define PHOTODIODE_PIN_DOWN   A6     // Photodiode - Servo Down   BLUE
 
 // Capacitive sensor pins - Lab 4
   #define CAP_SENSOR_SEND_PIN 11
