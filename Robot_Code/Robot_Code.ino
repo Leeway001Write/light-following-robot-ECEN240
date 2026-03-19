@@ -531,12 +531,14 @@ void fsmCapacitiveSensorSpeedControl() {
 
   switch (sensorState) {
     case 0: // Not pressed
+      doTurnLedOff(LED_BUILTIN);
 
       if (SensedCapacitiveTouch == DETECTION_YES) {
         sensorState = 1;
       }
       break;
     case 1: // Pressed
+      doTurnLedOn(LED_BUILTIN);
 
       if (SensedCapacitiveTouch == DETECTION_NO) {
         sensorState = 2;
