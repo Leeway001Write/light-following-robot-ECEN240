@@ -22,6 +22,7 @@
 your sensors and servos. */
 #include "Arduino.h"
 #include <CapacitiveSensor.h>
+#include <NewPing.h>
 
 //
 // Compiler defines: the compiler replaces each name with its assignment
@@ -34,9 +35,7 @@ your sensors and servos. */
 
 // LED pins (note that digital pins do not need "D" in front of them)
 #define LED_1   6       // Far Left LED - Servo Up
-#define LED_2   5       // Left Middle LED  - Left Motor
 #define LED_3   4       // Middle LED - Collision
-#define LED_4   3       // Right Middle LED - Right Motor
 #define LED_5   2       // Far Right LED - Servo Down
 
 // Motor enable pins - Lab 3
@@ -67,7 +66,6 @@ your sensors and servos. */
 // Photodiode pins - Lab 5
 #define PHOTODIODE_PIN_UP     A2     // Photodiode - Servo Up     ORANGE
 #define PHOTODIODE_PIN_LEFT   A3     // Photodiode - Left Motor   PURPLE
-#define BUTTON_3         A4     // Sensor     - Collision       RED
 #define PHOTODIODE_PIN_RIGHT  A5     // Photodiode - Right Motor  YELLOW
 #define PHOTODIODE_PIN_DOWN   A6     // Photodiode - Servo Down   BLUE
 
@@ -75,11 +73,12 @@ your sensors and servos. */
   #define CAP_SENSOR_SEND_PIN 11
   #define CAP_SENSOR_RECEIVE_PIN 7
 
-// Ultrasonic sensor pin - Lab 6
-// This will replace button 3 and LED 3 will no longer be needed
+// Collision sensor pins - Lab 6
+  #define TRIGGER_PIN 12  // Arduino pin tied to trigger pin on the ultrasonic sensor.
+  #define ECHO_PIN 10  // Arduino pin tied to echo pin on the ultrasonic sensor.
 
 // Servo pin - Lab 6
-// This will replace LEDs 1 and 5
+
 
 /***********************************************************/
 // Configuration parameter definitions
@@ -99,9 +98,16 @@ your sensors and servos. */
 
 
 // Parameters for ultrasonic sensor and instantiation - Lab 6
+  // Maximum distance we want to ping for (in centimeters). 
+  // Maximum sensor distance is rated at 400-500cm, so we choose 200.
+  #define MAX_DISTANCE 200 
+
+  // NewPing setup of pins
+  static NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); 
 
 
 // Parameter to define when the ultrasonic sensor detects a collision - Lab 6
+  #define COLLISION_DISTANCE 10 // cm
 
 
 
@@ -180,16 +186,21 @@ void setup() {
   pinMode(LED_3, OUTPUT);
   pinMode(H_BRIDGE_ENB, OUTPUT);
   pinMode(LED_5, OUTPUT);
+
   pinMode(CAP_SENSOR_SEND_PIN, OUTPUT);
+
+  pinMode(TRIGGER_PIN, OUTPUT); // sonar pulse sent out through TRIGGER_PIN    
+  
   
   //Set up input pins
   pinMode(PHOTODIODE_PIN_UP, INPUT);
   pinMode(PHOTODIODE_PIN_LEFT, INPUT);
-  pinMode(BUTTON_3, INPUT);
   pinMode(PHOTODIODE_PIN_RIGHT, INPUT);
   pinMode(PHOTODIODE_PIN_DOWN, INPUT);
-
+  
   pinMode(CAP_SENSOR_RECEIVE_PIN, INPUT);
+  
+  pinMode(ECHO_PIN, INPUT); // sonar return signal read through ECHO_PIN
 
   //Set up servo - Lab 6
 
@@ -321,15 +332,13 @@ bool isButtonPushed(int button_pin) {
 // Function that detects if there is an obstacle in front of robot
 ////////////////////////////////////////////////////////////////////
 bool isCollision() {
-  //This is where you add code that tests if the collision button 
-  // was pushed (BUTTON_3)
-  //In lab 6 you will add a sonar sensor to detect collision and
-  // the code for the sonar sensor will go in this function.
-  // Until then we will use a button to model the sensor.
-  if (isButtonPushed(BUTTON_3)) {
-    return true;
+  int sonar_distance = sonar.ping_cm(); // If the distance is too big, it returns 0.
+  // Serial.println(sonar_distance);
+
+  if(sonar_distance != 0){ 
+    return (sonar_distance < COLLISION_DISTANCE);
   } else {
-    return false;
+	  return false;
   }
 }
 
