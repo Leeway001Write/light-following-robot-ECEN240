@@ -23,6 +23,7 @@ your sensors and servos. */
 #include "Arduino.h"
 #include <CapacitiveSensor.h>
 #include <NewPing.h>
+#include <Servo.h>
 
 //
 // Compiler defines: the compiler replaces each name with its assignment
@@ -78,6 +79,7 @@ your sensors and servos. */
   #define ECHO_PIN 10  // Arduino pin tied to echo pin on the ultrasonic sensor.
 
 // Servo pin - Lab 6
+#define SERVO_PIN 9
 
 
 /***********************************************************/
@@ -95,7 +97,11 @@ your sensors and servos. */
 #define CAP_SENSOR_TAU_THRESHOLD 1000 // tau value at which touch will register
 
 // Parameters for servo control as well as instantiation - Lab 6
-
+#define SERVO_START_ANGLE 135
+#define SERVO_UP_LIMIT 110
+#define SERVO_DOWN_LIMIT 180
+#define SERVO_SPEED 1
+static Servo servo;
 
 // Parameters for ultrasonic sensor and instantiation - Lab 6
   // Maximum distance we want to ping for (in centimeters). 
@@ -203,7 +209,8 @@ void setup() {
   pinMode(ECHO_PIN, INPUT); // sonar return signal read through ECHO_PIN
 
   //Set up servo - Lab 6
-
+  servo.attach(SERVO_PIN);
+  servo.write(SERVO_START_ANGLE);
 }
 
 /********************************************************************
@@ -709,19 +716,22 @@ void RobotAction() {
 void MoveServo() {
   // Note that there needs to be some logic in the action of moving
   // the servo so that it does not exceed its range
-  /* Add CurrentServoAngle in lab 6 */
+  static int CurrentServoAngle = SERVO_START_ANGLE;
+
   switch(ActionServoMove) {
     case SERVO_MOVE_STOP:
-        doTurnLedOff(LED_1);
-        doTurnLedOff(LED_5);
-    break;
+      break;
     case SERVO_MOVE_UP:
-        doTurnLedOn(LED_1);
-        doTurnLedOff(LED_5);
+      CurrentServoAngle -= SERVO_SPEED;
+      if (CurrentServoAngle <= SERVO_UP_LIMIT) {
+        servo.write(CurrentServoAngle);
+      }
       break;
     case SERVO_MOVE_DOWN:
-      doTurnLedOn(LED_5);
-      doTurnLedOff(LED_1);
+      CurrentServoAngle += SERVO_SPEED;
+      if (CurrentServoAngle >= SERVO_DOWN_LIMIT) {
+        servo.write(CurrentServoAngle);
+      }
       break;
   }
 }
