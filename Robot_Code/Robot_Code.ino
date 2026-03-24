@@ -150,6 +150,7 @@ static Servo servo;
 
 // Collision (using Definitions)
 int SensedCollision = DETECTION_NO;
+float SensedDistance = COLLISION_DISTANCE;
 
 // Photodiode inputs (using Definitions) - The button represent the photodiodes for lab 2
 int SensedLightRight = DETECTION_NO;
@@ -390,19 +391,18 @@ void RobotPlanning(void) {
 ////////////////////////////////////////////////////////////////////
 void fsmCollisionDetection() {
   static int collisionDetectionState = 0;
+  static float initialCollisionDistance = 0;
   //Serial.print(collisionDetectionState); Serial.print("\t"); //uncomment for debugging
   
   switch (collisionDetectionState) {
     case 0: //collision detected
       //There is an obstacle, stop the robot
       ActionCollision = COLLISION_ON; // Sets the action to turn on the collision LED
-      ActionRobotDrive = 0;
-      
+      ActionRobotDrive = DRIVE_STOP;
       
       //State transition logic
-      if ( SensedCollision == DETECTION_NO) {
-        collisionDetectionState = 1; //if no collision, go to no collision state
-      }
+      initialCollisionDistance = sonar.ping_cm();
+      collisionDetectionState = 2; // Turn away
       break;
     
     case 1: //no collision
@@ -417,6 +417,26 @@ void fsmCollisionDetection() {
       }
       break;
 
+    case 2: //turning away (left)
+      // There is an obstacle, turn left
+      ActionRobotDrive = DRIVE_LEFT;
+
+      //State transition logic
+      if ( SensedCollision == DETECTION_NO) {
+        collisionDetectionState = 1; //if no collision, go to no collision state
+      } else if (sonar.ping_cm() < initialCollisionDistance) {
+        collisionDetectionState = 3; //if turning left got us closer, turn away to the right instead
+      }
+      break;
+    
+    case 3: //turning away (right)
+      // There is an obstace, turn right
+      ActionRobotDrive = DRIVE_RIGHT;
+
+      //State transition logic
+      if ( SensedCollision == DETECTION_NO) {
+        collisionDetectionState = 1; //if no collision, go to no collision state
+      }
     default: // error handling
       {
         collisionDetectionState = 0;
