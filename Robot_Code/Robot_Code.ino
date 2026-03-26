@@ -341,7 +341,7 @@ bool isButtonPushed(int button_pin) {
 ////////////////////////////////////////////////////////////////////
 bool isCollision() {
   int sonar_distance = getDistanceSmoothed(); // If the distance is too big, it returns 0.
-   Serial.println(sonar_distance);
+  //  Serial.println(sonar_distance);
 
   if(sonar_distance != 0){ 
     return (sonar_distance < COLLISION_DISTANCE);
@@ -718,30 +718,35 @@ void MoveServo() {
   // the servo so that it does not exceed its range
   static int CurrentServoAngle = SERVO_START_ANGLE;
 
+  Serial.println(CurrentServoAngle);
+
   switch(ActionServoMove) {
+
     case SERVO_MOVE_STOP:
       doTurnLedOff(LED_SERVO_UP);
       doTurnLedOff(LED_SERVO_DOWN);
+      // servo.write(CurrentServoAngle);
       break;
-    case SERVO_MOVE_UP:
-      CurrentServoAngle -= SERVO_SPEED;
-      doTurnLedOn(LED_SERVO_UP);
-      doTurnLedOff(LED_SERVO_DOWN);
 
-      if (CurrentServoAngle <= SERVO_UP_LIMIT) {
+    case SERVO_MOVE_UP:
+      if (CurrentServoAngle >= SERVO_UP_LIMIT) {
+        CurrentServoAngle -= SERVO_SPEED;
         servo.write(CurrentServoAngle);
+
+        doTurnLedOn(LED_SERVO_UP);
+        doTurnLedOff(LED_SERVO_DOWN);
       } else {
         doTurnLedOff(LED_SERVO_UP);
         doTurnLedOff(LED_SERVO_DOWN);
       }
       break;
+
     case SERVO_MOVE_DOWN:
+      if (CurrentServoAngle <= SERVO_DOWN_LIMIT) {
       CurrentServoAngle += SERVO_SPEED;
+      servo.write(CurrentServoAngle);
       doTurnLedOff(LED_SERVO_UP);
       doTurnLedOn(LED_SERVO_DOWN);
-      
-      if (CurrentServoAngle >= SERVO_DOWN_LIMIT) {
-        servo.write(CurrentServoAngle);
       } else {
         doTurnLedOff(LED_SERVO_UP);
         doTurnLedOff(LED_SERVO_DOWN);
@@ -779,8 +784,6 @@ float getDistanceSmoothed() {
         // alpha filter all good measurements     
         distanceSmoothed = alpha*distanceSmoothed +(1-alpha)*distance;
     }
-
-    Serial.println(distanceSmoothed);
     
     return(distanceSmoothed);
 }
