@@ -90,7 +90,7 @@ your sensors and servos. */
 #define BUTTON_THRESHOLD 2.5
 
 // Voltage at which a photodiode voltage is considered to be present - Lab 5
-#define PHOTODIODE_LIGHT_THRESHOLD 2.75 // Sensor is ON if light is greater than this many volts
+#define PHOTODIODE_LIGHT_THRESHOLD 2.85 // Sensor is ON if light is greater than this many volts
 
 // Number of samples that the capacitor sensor will use in a measurement - Lab 4
 #define CAP_SENSOR_SAMPLES 40
