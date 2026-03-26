@@ -113,7 +113,7 @@ static Servo servo;
 
 
 // Parameter to define when the ultrasonic sensor detects a collision - Lab 6
-  #define COLLISION_DISTANCE 10 // cm
+  #define COLLISION_DISTANCE 40 // cm
 
 
 
@@ -222,7 +222,7 @@ void loop() {
   // This DebugStateOutput flag can be used to easily turn on the
   // serial debugging to know what the robot is perceiving and what
   // actions the robot wants to take.
-  int DebugStateOutput = true; // Change false to true to debug
+  int DebugStateOutput = false; // Change false to true to debug
   
   RobotPerception(); // PERCEPTION
   if (DebugStateOutput) {
@@ -340,8 +340,8 @@ bool isButtonPushed(int button_pin) {
 // Function that detects if there is an obstacle in front of robot
 ////////////////////////////////////////////////////////////////////
 bool isCollision() {
-  int sonar_distance = sonar.ping_cm(); // If the distance is too big, it returns 0.
-  // Serial.println(sonar_distance);
+  int sonar_distance = getDistanceSmoothed(); // If the distance is too big, it returns 0.
+   Serial.println(sonar_distance);
 
   if(sonar_distance != 0){ 
     return (sonar_distance < COLLISION_DISTANCE);
@@ -401,7 +401,7 @@ void fsmCollisionDetection() {
       ActionRobotDrive = DRIVE_STOP;
       
       //State transition logic
-      initialCollisionDistance = sonar.ping_cm();
+      initialCollisionDistance = getDistanceSmoothed();
       collisionDetectionState = 2; // Turn away
       break;
     
@@ -417,26 +417,28 @@ void fsmCollisionDetection() {
       }
       break;
 
-    case 2: //turning away (left)
-      // There is an obstacle, turn left
-      ActionRobotDrive = DRIVE_LEFT;
-
-      //State transition logic
-      if ( SensedCollision == DETECTION_NO) {
-        collisionDetectionState = 1; //if no collision, go to no collision state
-      } else if (sonar.ping_cm() < initialCollisionDistance) {
-        collisionDetectionState = 3; //if turning left got us closer, turn away to the right instead
-      }
-      break;
-    
-    case 3: //turning away (right)
-      // There is an obstace, turn right
+    case 2: //turning away (right)
+      // There is an obstacle, turn right
       ActionRobotDrive = DRIVE_RIGHT;
 
       //State transition logic
       if ( SensedCollision == DETECTION_NO) {
         collisionDetectionState = 1; //if no collision, go to no collision state
+      } else if (getDistanceSmoothed() < COLLISION_DISTANCE/2) {
+        collisionDetectionState = 3; //if turning right is too tight (sensor is on right), turn away to the left instead
       }
+      break;
+    
+    case 3: //turning away (left)
+      // There is an obstace, turn left
+      ActionRobotDrive = DRIVE_LEFT;
+
+      //State transition logic
+      if ( SensedCollision == DETECTION_NO) {
+        collisionDetectionState = 1; //if no collision, go to no collision state
+      }
+      break;
+      
     default: // error handling
       {
         collisionDetectionState = 0;
@@ -771,4 +773,22 @@ void doTurnLedOn(int led_pin)
 void doTurnLedOff(int led_pin)
 {
   digitalWrite(led_pin, LOW);
+}
+
+float getDistanceSmoothed() {
+    static float distanceSmoothed = sonar.ping_cm();
+    float distance = sonar.ping_cm();
+    float alpha = 0.9; // alpha-filter constant
+    if (distance != 0) {
+        // this is an example of a measurement gate:
+        // sensor returns a 0 when it times out 
+        // (i.e., no measurement) ignore those measurements
+            
+        // alpha filter all good measurements     
+        distanceSmoothed = alpha*distanceSmoothed +(1-alpha)*distance;
+    }
+
+    Serial.println(distanceSmoothed);
+    
+    return(distanceSmoothed);
 }
