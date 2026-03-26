@@ -35,9 +35,9 @@ your sensors and servos. */
 // Replace the pin numbers with those you connect to your robot
 
 // LED pins (note that digital pins do not need "D" in front of them)
-#define LED_1   6       // Far Left LED - Servo Up
-#define LED_3   4       // Middle LED - Collision
-#define LED_5   2       // Far Right LED - Servo Down
+#define LED_SERVO_UP   6       // Far Left LED - Servo Up
+#define LED_COLLISION   4       // Middle LED - Collision
+#define LED_SERVO_DOWN   2       // Far Right LED - Servo Down
 
 // Motor enable pins - Lab 3
 #define H_BRIDGE_ENA 5
@@ -113,7 +113,7 @@ static Servo servo;
 
 
 // Parameter to define when the ultrasonic sensor detects a collision - Lab 6
-  #define COLLISION_DISTANCE 40 // cm
+  #define COLLISION_DISTANCE 15 // cm
 
 
 
@@ -188,11 +188,11 @@ void setup() {
   Serial.begin(9600);
   
   //Set up output pins
-  pinMode(LED_1, OUTPUT);
+  pinMode(LED_SERVO_UP, OUTPUT);
   pinMode(H_BRIDGE_ENA, OUTPUT);
-  pinMode(LED_3, OUTPUT);
+  pinMode(LED_COLLISION, OUTPUT);
   pinMode(H_BRIDGE_ENB, OUTPUT);
-  pinMode(LED_5, OUTPUT);
+  pinMode(LED_SERVO_DOWN, OUTPUT);
 
   pinMode(CAP_SENSOR_SEND_PIN, OUTPUT);
 
@@ -391,18 +391,18 @@ void RobotPlanning(void) {
 ////////////////////////////////////////////////////////////////////
 void fsmCollisionDetection() {
   static int collisionDetectionState = 0;
-  static float initialCollisionDistance = 0;
   //Serial.print(collisionDetectionState); Serial.print("\t"); //uncomment for debugging
   
   switch (collisionDetectionState) {
     case 0: //collision detected
       //There is an obstacle, stop the robot
       ActionCollision = COLLISION_ON; // Sets the action to turn on the collision LED
-      ActionRobotDrive = DRIVE_STOP;
+      ActionRobotDrive = DRIVE_RIGHT;
       
       //State transition logic
-      initialCollisionDistance = getDistanceSmoothed();
-      collisionDetectionState = 2; // Turn away
+      if (!isCollision()) {
+        collisionDetectionState = 1; //if no collision, go to drive state
+      }
       break;
     
     case 1: //no collision
@@ -414,28 +414,6 @@ void fsmCollisionDetection() {
       //State transition logic
       if (isCollision()) {
         collisionDetectionState = 0; //if collision, go to collision state
-      }
-      break;
-
-    case 2: //turning away (left)
-      // There is an obstacle, turn left
-      ActionRobotDrive = DRIVE_LEFT;
-
-      //State transition logic
-      if ( SensedCollision == DETECTION_NO) {
-        collisionDetectionState = 1; //if no collision, go to no collision state
-      } else if ((initialCollisionDistance - getDistanceSmoothed()) > (COLLISION_DISTANCE / 3)) {
-        collisionDetectionState = 3; //if turning left is too tight (sensor is on left), turn away to the right instead
-      }
-      break;
-    
-    case 3: //turning away (right)
-      // There is an obstace, turn right
-      ActionRobotDrive = DRIVE_RIGHT;
-
-      //State transition logic
-      if ( SensedCollision == DETECTION_NO) {
-        collisionDetectionState = 1; //if no collision, go to no collision state
       }
       break;
       
@@ -700,10 +678,10 @@ void RobotAction() {
   // This turns the collision LED on and off
   switch(ActionCollision) {
     case COLLISION_OFF:
-      doTurnLedOff(LED_3); //Collision LED off
+      doTurnLedOff(LED_COLLISION); //Collision LED off
       break;
     case COLLISION_ON:
-      doTurnLedOn(LED_3);
+      doTurnLedOn(LED_COLLISION);
       break;
   }
   
@@ -742,17 +720,31 @@ void MoveServo() {
 
   switch(ActionServoMove) {
     case SERVO_MOVE_STOP:
+      doTurnLedOff(LED_SERVO_UP);
+      doTurnLedOff(LED_SERVO_DOWN);
       break;
     case SERVO_MOVE_UP:
       CurrentServoAngle -= SERVO_SPEED;
+      doTurnLedOn(LED_SERVO_UP);
+      doTurnLedOff(LED_SERVO_DOWN);
+
       if (CurrentServoAngle <= SERVO_UP_LIMIT) {
         servo.write(CurrentServoAngle);
+      } else {
+        doTurnLedOff(LED_SERVO_UP);
+        doTurnLedOff(LED_SERVO_DOWN);
       }
       break;
     case SERVO_MOVE_DOWN:
       CurrentServoAngle += SERVO_SPEED;
+      doTurnLedOff(LED_SERVO_UP);
+      doTurnLedOn(LED_SERVO_DOWN);
+      
       if (CurrentServoAngle >= SERVO_DOWN_LIMIT) {
         servo.write(CurrentServoAngle);
+      } else {
+        doTurnLedOff(LED_SERVO_UP);
+        doTurnLedOff(LED_SERVO_DOWN);
       }
       break;
   }
