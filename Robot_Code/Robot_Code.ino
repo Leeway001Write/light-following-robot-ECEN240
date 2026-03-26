@@ -35,9 +35,7 @@ your sensors and servos. */
 // Replace the pin numbers with those you connect to your robot
 
 // LED pins (note that digital pins do not need "D" in front of them)
-#define LED_SERVO_UP   6       // Far Left LED - Servo Up
 #define LED_COLLISION   4       // Middle LED - Collision
-#define LED_SERVO_DOWN   2       // Far Right LED - Servo Down
 
 // Motor enable pins - Lab 3
 #define H_BRIDGE_ENA 5
@@ -188,11 +186,9 @@ void setup() {
   Serial.begin(9600);
   
   //Set up output pins
-  pinMode(LED_SERVO_UP, OUTPUT);
   pinMode(H_BRIDGE_ENA, OUTPUT);
   pinMode(LED_COLLISION, OUTPUT);
   pinMode(H_BRIDGE_ENB, OUTPUT);
-  pinMode(LED_SERVO_DOWN, OUTPUT);
 
   pinMode(CAP_SENSOR_SEND_PIN, OUTPUT);
 
@@ -723,33 +719,20 @@ void MoveServo() {
   switch(ActionServoMove) {
 
     case SERVO_MOVE_STOP:
-      doTurnLedOff(LED_SERVO_UP);
-      doTurnLedOff(LED_SERVO_DOWN);
-      // servo.write(CurrentServoAngle);
+      // do nothing
       break;
 
     case SERVO_MOVE_UP:
       if (CurrentServoAngle >= SERVO_UP_LIMIT) {
         CurrentServoAngle -= SERVO_SPEED;
         servo.write(CurrentServoAngle);
-
-        doTurnLedOn(LED_SERVO_UP);
-        doTurnLedOff(LED_SERVO_DOWN);
-      } else {
-        doTurnLedOff(LED_SERVO_UP);
-        doTurnLedOff(LED_SERVO_DOWN);
       }
       break;
 
     case SERVO_MOVE_DOWN:
       if (CurrentServoAngle <= SERVO_DOWN_LIMIT) {
-      CurrentServoAngle += SERVO_SPEED;
-      servo.write(CurrentServoAngle);
-      doTurnLedOff(LED_SERVO_UP);
-      doTurnLedOn(LED_SERVO_DOWN);
-      } else {
-        doTurnLedOff(LED_SERVO_UP);
-        doTurnLedOff(LED_SERVO_DOWN);
+        CurrentServoAngle += SERVO_SPEED;
+        servo.write(CurrentServoAngle);
       }
       break;
   }
