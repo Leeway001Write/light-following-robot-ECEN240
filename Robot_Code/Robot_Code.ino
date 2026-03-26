@@ -417,21 +417,21 @@ void fsmCollisionDetection() {
       }
       break;
 
-    case 2: //turning away (right)
-      // There is an obstacle, turn right
-      ActionRobotDrive = DRIVE_RIGHT;
+    case 2: //turning away (left)
+      // There is an obstacle, turn left
+      ActionRobotDrive = DRIVE_LEFT;
 
       //State transition logic
       if ( SensedCollision == DETECTION_NO) {
         collisionDetectionState = 1; //if no collision, go to no collision state
-      } else if (getDistanceSmoothed() < COLLISION_DISTANCE/2) {
-        collisionDetectionState = 3; //if turning right is too tight (sensor is on right), turn away to the left instead
+      } else if ((initialCollisionDistance - getDistanceSmoothed()) > (COLLISION_DISTANCE / 3)) {
+        collisionDetectionState = 3; //if turning left is too tight (sensor is on left), turn away to the right instead
       }
       break;
     
-    case 3: //turning away (left)
-      // There is an obstace, turn left
-      ActionRobotDrive = DRIVE_LEFT;
+    case 3: //turning away (right)
+      // There is an obstace, turn right
+      ActionRobotDrive = DRIVE_RIGHT;
 
       //State transition logic
       if ( SensedCollision == DETECTION_NO) {
