@@ -714,7 +714,7 @@ void MoveServo() {
   // the servo so that it does not exceed its range
   static int CurrentServoAngle = SERVO_START_ANGLE;
 
-  Serial.println(CurrentServoAngle);
+  // Serial.println(CurrentServoAngle);
 
   switch(ActionServoMove) {
 
